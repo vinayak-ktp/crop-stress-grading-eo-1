@@ -19,25 +19,40 @@ class PositionalEncoding(nn.Module):
 
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, num_classes, d_model=32, nhead=4, num_layers=2):
+    def __init__(self, input_dim, num_classes, d_model=64, nhead=8, num_layers=4):
         super(TransformerModel, self).__init__()
+        self.d_model = d_model
         self.embedding = nn.Linear(1, d_model)
         self.pos_encoder = PositionalEncoding(d_model)
 
+        # Learnable [CLS] token for classification
+        self.cls_token = nn.Parameter(torch.randn(1, 1, d_model))
+
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=d_model, nhead=nhead, dim_feedforward=128, batch_first=True, dropout=0.3
+            d_model=d_model, nhead=nhead, dim_feedforward=256,
+            batch_first=True, dropout=0.2, activation='gelu'
         )
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.transformer_encoder = nn.TransformerEncoder(
+            encoder_layer, num_layers=num_layers,
+            norm=nn.LayerNorm(d_model)
+        )
 
         self.classifier = nn.Sequential(
-            nn.Linear(d_model * input_dim, 64),
-            nn.ReLU(),
-            nn.Linear(64, num_classes)
+            nn.LayerNorm(d_model),
+            nn.Linear(d_model, 128),
+            nn.GELU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, num_classes)
         )
 
     def forward(self, x):
         x = self.embedding(x)    # (batch, seq_len, d_model)
+        batch_size = x.size(0)
+        # Prepend [CLS] token
+        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
+        x = torch.cat([cls_tokens, x], dim=1)
         x = self.pos_encoder(x)
         x = self.transformer_encoder(x)
-        x = x.flatten(start_dim=1)
-        return self.classifier(x)
+        # Use [CLS] token output for classification
+        cls_output = x[:, 0, :]
+        return self.classifier(cls_output)
