@@ -1,0 +1,176 @@
+import json
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+MODELS = ["resnet", "transformer", "hybrid"]
+RESULTS_DIR = os.path.join("_results", "raw")
+PLOTS_DIR = os.path.join("_results", "plots")
+
+MODEL_COLORS = {
+    "resnet": "#4878CF",
+    "transformer": "#D65F5F",
+    "hybrid": "#6ACC65",
+}
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.size": 11,
+    "axes.titlesize": 12,
+    "axes.titleweight": "normal",
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "figure.dpi": 150,
+})
+
+
+def _apply_grid_style(ax):
+    ax.set_facecolor("#f0f0f0")
+    ax.yaxis.grid(True, color="white", linewidth=1.2, zorder=0)
+    ax.set_axisbelow(True)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+
+def load_results(model_name):
+    json_path = os.path.join(RESULTS_DIR, f"{model_name}.json")
+    if not os.path.exists(json_path):
+        return None
+    with open(json_path, "r") as f:
+        return json.load(f)
+
+
+def plot_per_model(model_name, data, plots_dir):
+    history = data["history"]
+    epochs = range(1, len(history["train_loss"]) + 1)
+    color = MODEL_COLORS.get(model_name, "#888888")
+
+    out_dir = os.path.join(plots_dir, "per_model")
+    os.makedirs(out_dir, exist_ok=True)
+
+    # Loss Curve
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(epochs, history["train_loss"], color=color, label="Train Loss", linewidth=1.8)
+    ax.plot(epochs, history["val_loss"], color=color, label="Val Loss", linewidth=1.8, linestyle="--", alpha=0.7)
+    _apply_grid_style(ax)
+    ax.set_title(f"{model_name.upper()} - Training & Validation Loss")
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("Loss")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, f"{model_name}_loss_curve.png"))
+    plt.close(fig)
+
+    # Confusion Matrix
+    cm = np.array(data["test_metrics"]["confusion_matrix"])
+    fig, ax = plt.subplots(figsize=(7, 5))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", linewidths=0.5,
+                linecolor="white", ax=ax, cbar=False)
+    ax.set_title(f"{model_name.upper()} - Test Confusion Matrix")
+    ax.set_ylabel("True Class")
+    ax.set_xlabel("Predicted Class")
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, f"{model_name}_confusion_matrix.png"))
+    plt.close(fig)
+
+
+def plot_comparison(all_data, plots_dir):
+    out_dir = os.path.join(plots_dir, "comparison")
+    os.makedirs(out_dir, exist_ok=True)
+
+    model_names = list(all_data.keys())
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle("Training & Validation Loss Comparison", y=1.01)
+
+    for model_name, data in all_data.items():
+        color = MODEL_COLORS.get(model_name, "#888888")
+        epochs = range(1, len(data["history"]["train_loss"]) + 1)
+        axes[0].plot(epochs, data["history"]["train_loss"], color=color,
+                     label=model_name, linewidth=1.8)
+        axes[1].plot(epochs, data["history"]["val_loss"], color=color,
+                     label=model_name, linewidth=1.8)
+
+    for ax, title in zip(axes, ["Train Loss - All Models", "Validation Loss - All Models"]):
+        _apply_grid_style(ax)
+        ax.set_title(title)
+        ax.set_xlabel("Epoch")
+        ax.set_ylabel("Loss")
+        ax.legend()
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, "loss_comparison.png"), bbox_inches="tight")
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle("Validation Metrics Comparison", y=1.01)
+
+    for model_name, data in all_data.items():
+        color = MODEL_COLORS.get(model_name, "#888888")
+        epochs = range(1, len(data["history"]["val_acc"]) + 1)
+        axes[0].plot(epochs, data["history"]["val_acc"], color=color,
+                     label=model_name, linewidth=1.8)
+        axes[1].plot(epochs, data["history"]["val_mcc"], color=color,
+                     label=model_name, linewidth=1.8)
+
+    for ax, title, ylabel in zip(
+        axes,
+        ["Validation Accuracy - All Models", "Validation MCC - All Models"],
+        ["Accuracy", "MCC"],
+    ):
+        _apply_grid_style(ax)
+        ax.set_title(title)
+        ax.set_xlabel("Epoch")
+        ax.set_ylabel(ylabel)
+        ax.legend()
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, "val_metrics_comparison.png"), bbox_inches="tight")
+    plt.close(fig)
+
+    metric_keys = ["accuracy", "f1_score", "mcc"]
+    metric_labels = ["Accuracy", "F1 Score", "MCC"]
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    fig.suptitle("Model Comparison - Test Set Metrics", y=1.01)
+
+    for ax, key, label in zip(axes, metric_keys, metric_labels):
+        colors = [MODEL_COLORS.get(m, "#888888") for m in model_names]
+        values = [all_data[m]["test_metrics"][key] for m in model_names]
+        bars = ax.bar(model_names, values, color=colors, width=0.5, zorder=3)
+
+        for bar, val in zip(bars, values):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + 0.005,
+                f"{val:.4f}",
+                ha="center", va="bottom", fontsize=9,
+            )
+
+        _apply_grid_style(ax)
+        ax.set_title(label)
+        ax.set_ylabel(label)
+        ax.set_ylim(0, max(values) * 1.2)
+        ax.tick_params(axis="x")
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, "test_metrics_comparison.png"), bbox_inches="tight")
+    plt.close(fig)
+
+
+if __name__ == "__main__":
+    all_data = {}
+    for model in MODELS:
+        data = load_results(model)
+        if data is None:
+            print(f"Skipping {model} (not found)")
+            continue
+        plot_per_model(model, data, PLOTS_DIR)
+        all_data[model] = data
+
+    if len(all_data) > 1:
+        plot_comparison(all_data, PLOTS_DIR)
+
+    print(f"Plots saved to {PLOTS_DIR}")
