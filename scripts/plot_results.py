@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 
@@ -6,8 +7,6 @@ import numpy as np
 import seaborn as sns
 
 MODELS = ["resnet", "transformer", "hybrid"]
-RESULTS_DIR = os.path.join("_results", "raw")
-PLOTS_DIR = os.path.join("_results", "plots")
 
 MODEL_COLORS = {
     "resnet": "#4878CF",
@@ -34,23 +33,21 @@ def _apply_grid_style(ax):
         spine.set_visible(False)
 
 
-def load_results(model_name):
-    json_path = os.path.join(RESULTS_DIR, f"{model_name}.json")
+def load_results(results_dir, model_name):
+    json_path = os.path.join(results_dir, f"{model_name}.json")
     if not os.path.exists(json_path):
         return None
     with open(json_path, "r") as f:
         return json.load(f)
 
 
-def plot_per_model(model_name, data, plots_dir):
+def plot_per_model(model_name, data, per_model_dir):
     history = data["history"]
     epochs = range(1, len(history["train_loss"]) + 1)
     color = MODEL_COLORS.get(model_name, "#888888")
 
-    out_dir = os.path.join(plots_dir, "per_model")
-    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(per_model_dir, exist_ok=True)
 
-    # Loss Curve
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(epochs, history["train_loss"], color=color, label="Train Loss", linewidth=1.8)
     ax.plot(epochs, history["val_loss"], color=color, label="Val Loss", linewidth=1.8, linestyle="--", alpha=0.7)
@@ -60,10 +57,9 @@ def plot_per_model(model_name, data, plots_dir):
     ax.set_ylabel("Loss")
     ax.legend()
     fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, f"{model_name}_loss_curve.png"))
+    fig.savefig(os.path.join(per_model_dir, f"{model_name}_loss_curve.png"))
     plt.close(fig)
 
-    # Confusion Matrix
     cm = np.array(data["test_metrics"]["confusion_matrix"])
     fig, ax = plt.subplots(figsize=(7, 5))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", linewidths=0.5,
@@ -72,14 +68,12 @@ def plot_per_model(model_name, data, plots_dir):
     ax.set_ylabel("True Class")
     ax.set_xlabel("Predicted Class")
     fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, f"{model_name}_confusion_matrix.png"))
+    fig.savefig(os.path.join(per_model_dir, f"{model_name}_confusion_matrix.png"))
     plt.close(fig)
 
 
-def plot_comparison(all_data, plots_dir):
-    out_dir = os.path.join(plots_dir, "comparison")
-    os.makedirs(out_dir, exist_ok=True)
-
+def plot_comparison(all_data, comparison_dir):
+    os.makedirs(comparison_dir, exist_ok=True)
     model_names = list(all_data.keys())
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -88,10 +82,8 @@ def plot_comparison(all_data, plots_dir):
     for model_name, data in all_data.items():
         color = MODEL_COLORS.get(model_name, "#888888")
         epochs = range(1, len(data["history"]["train_loss"]) + 1)
-        axes[0].plot(epochs, data["history"]["train_loss"], color=color,
-                     label=model_name, linewidth=1.8)
-        axes[1].plot(epochs, data["history"]["val_loss"], color=color,
-                     label=model_name, linewidth=1.8)
+        axes[0].plot(epochs, data["history"]["train_loss"], color=color, label=model_name, linewidth=1.8)
+        axes[1].plot(epochs, data["history"]["val_loss"], color=color, label=model_name, linewidth=1.8)
 
     for ax, title in zip(axes, ["Train Loss - All Models", "Validation Loss - All Models"]):
         _apply_grid_style(ax)
@@ -101,7 +93,7 @@ def plot_comparison(all_data, plots_dir):
         ax.legend()
 
     fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "loss_comparison.png"), bbox_inches="tight")
+    fig.savefig(os.path.join(comparison_dir, "loss_comparison.png"), bbox_inches="tight")
     plt.close(fig)
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -110,10 +102,8 @@ def plot_comparison(all_data, plots_dir):
     for model_name, data in all_data.items():
         color = MODEL_COLORS.get(model_name, "#888888")
         epochs = range(1, len(data["history"]["val_acc"]) + 1)
-        axes[0].plot(epochs, data["history"]["val_acc"], color=color,
-                     label=model_name, linewidth=1.8)
-        axes[1].plot(epochs, data["history"]["val_mcc"], color=color,
-                     label=model_name, linewidth=1.8)
+        axes[0].plot(epochs, data["history"]["val_acc"], color=color, label=model_name, linewidth=1.8)
+        axes[1].plot(epochs, data["history"]["val_mcc"], color=color, label=model_name, linewidth=1.8)
 
     for ax, title, ylabel in zip(
         axes,
@@ -127,7 +117,7 @@ def plot_comparison(all_data, plots_dir):
         ax.legend()
 
     fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "val_metrics_comparison.png"), bbox_inches="tight")
+    fig.savefig(os.path.join(comparison_dir, "val_metrics_comparison.png"), bbox_inches="tight")
     plt.close(fig)
 
     metric_keys = ["accuracy", "f1_score", "mcc"]
@@ -156,21 +146,29 @@ def plot_comparison(all_data, plots_dir):
         ax.tick_params(axis="x")
 
     fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "test_metrics_comparison.png"), bbox_inches="tight")
+    fig.savefig(os.path.join(comparison_dir, "test_metrics_comparison.png"), bbox_inches="tight")
     plt.close(fig)
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--exp", type=str, required=True, help="Experiment name to load and plot")
+    args = parser.parse_args()
+
+    results_dir = os.path.join("_results", "raw", args.exp)
+    per_model_dir = os.path.join("_results", "plots", args.exp, "per_model")
+    comparison_dir = os.path.join("_results", "plots", args.exp, "comparison")
+
     all_data = {}
     for model in MODELS:
-        data = load_results(model)
+        data = load_results(results_dir, model)
         if data is None:
-            print(f"Skipping {model} (not found)")
+            print(f"Skipping {model} (not found in {results_dir})")
             continue
-        plot_per_model(model, data, PLOTS_DIR)
+        plot_per_model(model, data, per_model_dir)
         all_data[model] = data
 
     if len(all_data) > 1:
-        plot_comparison(all_data, PLOTS_DIR)
+        plot_comparison(all_data, comparison_dir)
 
-    print(f"Plots saved to {PLOTS_DIR}")
+    print(f"Plots saved to _results/plots/{args.exp}/")
