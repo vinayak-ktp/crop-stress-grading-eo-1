@@ -1,21 +1,60 @@
 import os
 
+import numpy as np
 import torch
 from tqdm import tqdm
 
 from training.metrics import compute_metrics
 
 
-def train_one_epoch(model, dataloader, criterion, optimizer, device):
+def mixup_data(x, y, alpha=0.4):
+    if alpha > 0:
+        lam = np.random.beta(alpha, alpha)
+    else:
+        lam = 1.0
+
+    batch_size = x.size(0)
+    index = torch.randperm(batch_size, device=x.device)
+
+    mixed_x = lam * x + (1 - lam) * x[index]
+    y_a, y_b = y, y[index]
+    return mixed_x, y_a, y_b, lam
+
+
+def mixup_criterion(criterion, pred, y_a, y_b, lam):
+    return lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b)
+
+
+def train_one_epoch(
+    model,
+    dataloader,
+    criterion,
+    optimizer,
+    device,use_mixup=False,
+    mixup_alpha=0.4,
+    max_grad_norm=1.0
+):
     model.train()
     total_loss = 0.0
 
     for X_batch, y_batch in tqdm(dataloader, desc="Training"):
         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
         optimizer.zero_grad()
-        output = model(X_batch)
-        loss = criterion(output, y_batch)
+
+        if use_mixup:
+            X_batch, y_a, y_b, lam = mixup_data(X_batch, y_batch, mixup_alpha)
+            output = model(X_batch)
+            loss = mixup_criterion(criterion, output, y_a, y_b, lam)
+        else:
+            output = model(X_batch)
+            loss = criterion(output, y_batch)
+
         loss.backward()
+
+        # Gradient clipping
+        if max_grad_norm > 0:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
+
         optimizer.step()
         total_loss += loss.item() * X_batch.size(0)
 
@@ -56,7 +95,11 @@ def train(
     device,
     num_epochs,
     save_path,
-    patience=10
+    patience=10,
+    use_mixup=False,
+    mixup_alpha=0.4,
+    max_grad_norm=1.0,
+    scheduler_type='plateau'
 ):
     history = {
         "train_loss": [],
@@ -68,10 +111,18 @@ def train(
     wait = 0
 
     for epoch in range(1, num_epochs + 1):
-        epoch_train_loss = train_one_epoch(model, train_dl, criterion, optimizer, device)
+        epoch_train_loss = train_one_epoch(
+            model, train_dl, criterion, optimizer, device,
+            use_mixup=use_mixup, mixup_alpha=mixup_alpha,
+            max_grad_norm=max_grad_norm
+        )
         epoch_val_loss, metrics = evaluate(model, val_dl, criterion, device)
 
-        scheduler.step(epoch_val_loss)
+        # Step the scheduler
+        if scheduler_type == 'plateau':
+            scheduler.step(epoch_val_loss)
+        else:
+            scheduler.step()
 
         history["train_loss"].append(epoch_train_loss)
         history["val_loss"].append(epoch_val_loss)
