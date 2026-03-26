@@ -14,8 +14,12 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
         optimizer.zero_grad()
         output = model(X_batch)
-        loss = criterion(output, y_batch)
+        loss   = criterion(output, y_batch)
         loss.backward()
+
+        # Gradient clipping — prevents explosive gradients in transformer layers
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
         optimizer.step()
         total_loss += loss.item() * X_batch.size(0)
 
@@ -24,15 +28,15 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
 
 def evaluate(model, dataloader, criterion, device):
     model.eval()
-    total_loss = 0.0
-    all_preds = []
+    total_loss  = 0.0
+    all_preds   = []
     all_targets = []
 
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
             output = model(X_batch)
-            loss = criterion(output, y_batch)
+            loss   = criterion(output, y_batch)
 
             total_loss += loss.item() * X_batch.size(0)
             preds = torch.argmax(output, dim=1)
@@ -41,7 +45,7 @@ def evaluate(model, dataloader, criterion, device):
             all_targets.extend(y_batch.cpu().numpy())
 
     avg_loss = total_loss / len(dataloader.dataset)
-    metrics = compute_metrics(all_targets, all_preds)
+    metrics  = compute_metrics(all_targets, all_preds)
 
     return avg_loss, metrics
 
@@ -56,22 +60,23 @@ def train(
     device,
     num_epochs,
     save_path,
-    patience=10
+    patience=15
 ):
     history = {
         "train_loss": [],
-        "val_loss": [],
-        "val_acc": [],
-        "val_mcc": []
+        "val_loss":   [],
+        "val_acc":    [],
+        "val_mcc":    []
     }
     best_mcc = -1.0
-    wait = 0
+    wait     = 0
 
     for epoch in range(1, num_epochs + 1):
-        epoch_train_loss = train_one_epoch(model, train_dl, criterion, optimizer, device)
-        epoch_val_loss, metrics = evaluate(model, val_dl, criterion, device)
+        epoch_train_loss             = train_one_epoch(model, train_dl, criterion, optimizer, device)
+        epoch_val_loss, metrics      = evaluate(model, val_dl, criterion, device)
 
-        scheduler.step(epoch_val_loss)
+        # Step CosineAnnealingWarmRestarts (or any other scheduler) every epoch
+        scheduler.step()
 
         history["train_loss"].append(epoch_train_loss)
         history["val_loss"].append(epoch_val_loss)
