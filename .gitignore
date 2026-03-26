@@ -5,3 +5,9 @@ __pycache__
 .ipynb_checkpoints
 *.bak
 .vscode
+
+data/processed/*
+data/splits/*
+
+!data/processed/.gitkeep
+!data/splits/.gitkeep
