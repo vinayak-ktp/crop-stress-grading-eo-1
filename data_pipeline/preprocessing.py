@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from scipy.signal import savgol_filter
+from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
@@ -52,7 +53,33 @@ def extract_indices(df):
     return mlvi, h_vsi
 
 
-def preprocess_hyperspectral_data(input_path, output_dir, target_col='Stage'):
+def continuum_removal(spectra):
+    n_samples, n_bands = spectra.shape
+    result = np.zeros_like(spectra)
+
+    for i in range(n_samples):
+        spectrum = spectra[i]
+        # Build convex hull upper envelope via simple linear interpolation bw local maxima
+        hull = np.copy(spectrum)
+        x = np.arange(n_bands)
+
+        # Upper envelope: linear interp between first and last point
+        envelope = np.interp(x, [0, n_bands - 1], [spectrum[0], spectrum[-1]])
+        # Refine: for each segment find local max and rebuild
+        for _ in range(3):
+            above = spectrum >= envelope
+            idx = np.where(above)[0]
+            if len(idx) >= 2:
+                envelope = np.interp(x, idx, spectrum[idx])
+
+        # Continuum removed = spectrum / envelope
+        envelope = np.maximum(envelope, 1e-8)
+        result[i] = spectrum / envelope
+
+    return result
+
+
+def preprocess_hyperspectral_data(input_path, output_dir, target_col='Stage', use_pca=False, pca_variance=0.99):
     # Skip 9 metadata rows
     df = pd.read_csv(input_path, skiprows=9, na_values=['NA', 'na', ''])
 
@@ -98,19 +125,34 @@ def preprocess_hyperspectral_data(input_path, output_dir, target_col='Stage'):
     print(f"Applying Savitzky-Golay filtering with window length {window_length}")
     X_smoothed = savgol_filter(X_raw.values, window_length=window_length, polyorder=2, axis=1)
 
-    print("Computing Derivative Spectroscopy")
+    print("Computing 1st and 2nd Derivative Spectroscopy")
     X_deriv1 = np.gradient(X_smoothed, axis=1)
+    X_deriv2 = np.gradient(X_deriv1, axis=1)
+
+    print("Applying Continuum Removal")
+    X_cr = continuum_removal(X_smoothed)
 
     print("Calculating MLVI and H_VSI")
     mlvi, h_vsi = extract_indices(X_raw)
 
-    # Combined features: Smoothed + 1st Derivative + Indices
+    # Combined features: Smoothed + 1st Derivative + 2nd Derivative + Continuum Removal + Indices
     X_combined = np.hstack([
         X_smoothed,
         X_deriv1,
+        X_deriv2,
+        X_cr,
         mlvi.reshape(-1, 1),
         h_vsi.reshape(-1, 1)
     ])
+
+    print(f"Combined feature count: {X_combined.shape[1]}")
+
+    # Optional PCA whitening
+    if use_pca:
+        print(f"Applying PCA (retaining {pca_variance * 100:.0f}% variance)")
+        pca = PCA(n_components=pca_variance, whiten=True, random_state=42)
+        X_combined = pca.fit_transform(X_combined)
+        print(f"PCA reduced features to: {X_combined.shape[1]}")
 
     # Normalizing features
     scaler = StandardScaler()

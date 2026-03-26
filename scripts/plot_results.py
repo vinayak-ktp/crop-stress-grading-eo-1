@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-MODELS = ["resnet", "transformer", "hybrid"]
+MODELS = ["resnet", "transformer", "hybrid", "inception", "ensemble"]
 RESULTS_DIR = os.path.join("_results", "raw")
 PLOTS_DIR = os.path.join("_results", "plots")
 
@@ -13,6 +13,8 @@ MODEL_COLORS = {
     "resnet": "#4878CF",
     "transformer": "#D65F5F",
     "hybrid": "#6ACC65",
+    "inception": "#B47CC7",
+    "ensemble": "#FFA500",
 }
 
 plt.rcParams.update({
