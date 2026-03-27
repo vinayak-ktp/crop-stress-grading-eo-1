@@ -6,12 +6,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-MODELS = ["resnet", "transformer", "hybrid"]
+MODELS = ["resnet", "transformer", "hybrid", "paper_cnn"]
 
 MODEL_COLORS = {
     "resnet": "#4878CF",
     "transformer": "#D65F5F",
     "hybrid": "#6ACC65",
+    "paper_cnn": "#E07B39",
 }
 
 plt.rcParams.update({
