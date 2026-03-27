@@ -19,24 +19,28 @@ class PositionalEncoding(nn.Module):
 
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, num_classes, d_model=32, nhead=4, num_layers=2):
+    def __init__(self, input_dim, num_classes, d_model=64, nhead=4, num_layers=3):
         super(TransformerModel, self).__init__()
-        self.embedding = nn.Linear(1, d_model)
-        self.pos_encoder = PositionalEncoding(d_model)
+        self.embedding    = nn.Linear(1, d_model)
+        self.pos_encoder  = PositionalEncoding(d_model)
 
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=d_model, nhead=nhead, dim_feedforward=128, batch_first=True, dropout=0.3
+            d_model=d_model, nhead=nhead, dim_feedforward=256,
+            batch_first=True, dropout=0.2
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
         self.classifier = nn.Sequential(
-            nn.Linear(d_model * input_dim, 64),
+            nn.Linear(d_model * input_dim, 256),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(256, 64),
             nn.ReLU(),
             nn.Linear(64, num_classes)
         )
 
     def forward(self, x):
-        x = self.embedding(x)    # (batch, seq_len, d_model)
+        x = self.embedding(x)          # (batch, seq_len, d_model)
         x = self.pos_encoder(x)
         x = self.transformer_encoder(x)
         x = x.flatten(start_dim=1)
