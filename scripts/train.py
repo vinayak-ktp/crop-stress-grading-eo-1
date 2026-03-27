@@ -7,7 +7,8 @@ import torch.nn as nn
 
 from data_pipeline.dataloader import get_loader
 from models.hybrid import HybridModel
-from models.resnet_1d import ResNet1D
+from models.paper_cnn import PaperCNN1D
+from models.resnet import ResNet1D
 from models.transformer import TransformerModel
 from training.metrics import compute_metrics, get_predictions
 from training.trainer import train
@@ -16,10 +17,11 @@ MODEL_MAP = {
     "resnet": ResNet1D,
     "transformer": TransformerModel,
     "hybrid": HybridModel,
+    "paper_cnn": PaperCNN1D,
 }
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, required=True, choices=["resnet", "transformer", "hybrid", "all"])
+parser.add_argument("--model", type=str, required=True, choices=["resnet", "transformer", "hybrid", "paper_cnn", "all"])
 parser.add_argument("--epochs", type=int, default=60)
 parser.add_argument("--exp", type=str, required=True, help="Experiment name used to namespace outputs")
 parser.add_argument("--lr", type=float, default=1e-3)
@@ -94,7 +96,7 @@ for model_name in models_to_train:
     test_metrics = compute_metrics(test_targets, test_preds)
 
     print(f"Test Accuracy: {test_metrics['accuracy']:.4f}")
-    print(f"Test MCC:      {test_metrics['mcc']:.4f}")
+    print(f"Test MCC: {test_metrics['mcc']:.4f}")
 
     out_data = {
         "hparams": {**hparams, "model": model_name, "total_params": total_params},
