@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-MODELS = ["resnet", "transformer", "hybrid", "paper_cnn"]
+MODELS = ["paper_cnn", "resnet", "transformer", "hybrid"]
 
 MODEL_COLORS = {
+    "paper_cnn": "#E07B39",
     "resnet": "#4878CF",
     "transformer": "#D65F5F",
     "hybrid": "#6ACC65",
-    "paper_cnn": "#E07B39",
 }
 
 plt.rcParams.update({
@@ -73,9 +73,9 @@ def plot_per_model(model_name, data, per_model_dir):
     plt.close(fig)
 
 
-def plot_comparison(all_data, comparison_dir):
+def plot_comparison(all_data, comparison_dir, ymin=0, ymax=100):
     os.makedirs(comparison_dir, exist_ok=True)
-    model_names = list(all_data.keys())
+    model_names = [m for m in MODELS if m in all_data]
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle("Training & Validation Loss Comparison", y=1.01)
@@ -121,29 +121,29 @@ def plot_comparison(all_data, comparison_dir):
     fig.savefig(os.path.join(comparison_dir, "val_metrics_comparison.png"), bbox_inches="tight")
     plt.close(fig)
 
-    metric_keys = ["accuracy", "f1_score", "mcc"]
-    metric_labels = ["Accuracy", "F1 Score", "MCC"]
+    metric_keys   = ["accuracy", "f1_score", "mcc"]
+    metric_labels = ["Accuracy (%)", "F1 Score (%)", "MCC (×100)"]
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     fig.suptitle("Model Comparison - Test Set Metrics", y=1.01)
 
     for ax, key, label in zip(axes, metric_keys, metric_labels):
         colors = [MODEL_COLORS.get(m, "#888888") for m in model_names]
-        values = [all_data[m]["test_metrics"][key] for m in model_names]
+        values = [all_data[m]["test_metrics"][key] * 100 for m in model_names]
         bars = ax.bar(model_names, values, color=colors, width=0.5, zorder=3)
 
         for bar, val in zip(bars, values):
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 bar.get_height() + 0.005,
-                f"{val:.4f}",
+                f"{val:.2f}",
                 ha="center", va="bottom", fontsize=9,
             )
 
         _apply_grid_style(ax)
         ax.set_title(label)
         ax.set_ylabel(label)
-        ax.set_ylim(0, max(values) * 1.2)
+        ax.set_ylim(ymin, ymax)
         ax.tick_params(axis="x")
 
     fig.tight_layout()
@@ -154,6 +154,8 @@ def plot_comparison(all_data, comparison_dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp", type=str, required=True, help="Experiment name to load and plot")
+    parser.add_argument("--ymin", type=int, default=0, help="Set ylim bottom value")
+    parser.add_argument("--ymax", type=int, default=100, help="Set ylim top value")
     args = parser.parse_args()
 
     results_dir = os.path.join("_results", "raw", args.exp)
@@ -170,6 +172,6 @@ if __name__ == "__main__":
         all_data[model] = data
 
     if len(all_data) > 1:
-        plot_comparison(all_data, comparison_dir)
+        plot_comparison(all_data, comparison_dir, args.ymin, args.ymax)
 
     print(f"Plots saved to _results/plots/{args.exp}/")
