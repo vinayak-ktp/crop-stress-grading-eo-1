@@ -1,7 +1,7 @@
 import os
-
 import numpy as np
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from scipy.signal import savgol_filter
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -128,11 +128,22 @@ def preprocess_hyperspectral_data(input_path, output_dir, target_col='Stage'):
 
     train_df, temp_df = train_test_split(df_processed, test_size=0.30, stratify=y, random_state=42)
     val_df, test_df = train_test_split(temp_df, test_size=0.50, stratify=temp_df['target'], random_state=42)
-
     splits_dir = os.path.join(os.path.dirname(output_dir), 'splits')
     os.makedirs(splits_dir, exist_ok=True)
+
+    X_tr = train_df.drop(columns=['target']).values
+    y_tr = train_df['target'].values
+
+    # Data augmentation with SMOTE
+    sm = SMOTE(random_state=42)
+    X_tr_res, y_tr_res = sm.fit_resample(X_tr, y_tr)
+
+    train_df = pd.DataFrame(X_tr_res, columns=train_df.drop(columns=['target']).columns)
+    train_df['target'] = y_tr_res
+    print("Data augmented with SMOTE")
 
     train_df.to_csv(os.path.join(splits_dir, 'train.csv'), index=False)
     val_df.to_csv(os.path.join(splits_dir, 'val.csv'), index=False)
     test_df.to_csv(os.path.join(splits_dir, 'test.csv'), index=False)
+
     print(f"Saved splits to {splits_dir}/")

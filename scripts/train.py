@@ -14,10 +14,10 @@ from training.metrics import compute_metrics, get_predictions
 from training.trainer import train
 
 MODEL_MAP = {
+    "paper_cnn": PaperCNN1D,
     "resnet": ResNet1D,
     "transformer": TransformerModel,
     "hybrid": HybridModel,
-    "paper_cnn": PaperCNN1D,
 }
 
 parser = argparse.ArgumentParser()
