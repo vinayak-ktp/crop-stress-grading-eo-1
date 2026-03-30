@@ -1,6 +1,6 @@
 {
   "hparams": {
-    "exp": "run_3",
+    "exp": "run_2",
     "epochs": 60,
     "batch_size": 64,
     "lr": 0.0005,
