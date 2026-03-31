@@ -41,6 +41,7 @@ def install_other_requirements():
         "matplotlib",
         "seaborn",
         "tqdm",
+        "imbalanced-learn"
     ]
     print("\nInstalling other dependencies...")
     run([sys.executable, "-m", "pip", "install"] + packages)

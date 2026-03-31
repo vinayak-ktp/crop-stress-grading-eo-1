@@ -53,30 +53,6 @@ def extract_indices(df):
     return mlvi, h_vsi
 
 
-def continuum_removal(spectra):
-    n_samples, n_bands = spectra.shape
-    result = np.zeros_like(spectra)
-
-    for i in range(n_samples):
-        spectrum = spectra[i]
-        x = np.arange(n_bands)
-
-        # Upper envelope: linear interp between first and last point
-        envelope = np.interp(x, [0, n_bands - 1], [spectrum[0], spectrum[-1]])
-        # Refine: for each segment find local max and rebuild
-        for _ in range(3):
-            above = spectrum >= envelope
-            idx = np.where(above)[0]
-            if len(idx) >= 2:
-                envelope = np.interp(x, idx, spectrum[idx])
-
-        # Continuum removed = spectrum / envelope
-        envelope = np.maximum(envelope, 1e-8)
-        result[i] = spectrum / envelope
-
-    return result
-
-
 def preprocess_hyperspectral_data(input_path, output_dir, target_col='Stage'):
     # Skip 9 metadata rows
     df = pd.read_csv(input_path, skiprows=9, na_values=['NA', 'na', ''])
@@ -126,22 +102,16 @@ def preprocess_hyperspectral_data(input_path, output_dir, target_col='Stage'):
     print("Computing Derivative Spectroscopy")
     X_deriv1 = np.gradient(X_smoothed, axis=1)
 
-    print("Applying Continuum Removal")
-    X_cr = continuum_removal(X_smoothed)
-
     print("Calculating MLVI and H_VSI")
     mlvi, h_vsi = extract_indices(X_raw)
 
-    # Combined features: Smoothed + 1st Derivative + Continuum Removal + Indices
+    # Combined features: Smoothed + 1st Derivative + Indices
     X_combined = np.hstack([
         X_smoothed,
         X_deriv1,
-        X_cr,
         mlvi.reshape(-1, 1),
         h_vsi.reshape(-1, 1)
     ])
-
-    print(f"Combined feature count: {X_combined.shape[1]}")
 
     # Normalizing features
     scaler = StandardScaler()
@@ -178,3 +148,4 @@ def preprocess_hyperspectral_data(input_path, output_dir, target_col='Stage'):
     test_df.to_csv(os.path.join(splits_dir, 'test.csv'), index=False)
 
     print(f"Saved splits to {splits_dir}/")
+    
