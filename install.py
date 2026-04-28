@@ -20,8 +20,7 @@ def install_torch(gpu: bool):
         print("GPU detected — installing PyTorch with CUDA 12.1 support")
         run([
             sys.executable, "-m", "pip", "install",
-            "torch", "torchvision", "torchaudio",
-            "--index-url", "https://download.pytorch.org/whl/cu121"
+            "torch", "--index-url", "https://download.pytorch.org/whl/cu121"
         ])
     else:
         print("No GPU detected — installing CPU-only PyTorch...")

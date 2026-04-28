@@ -37,12 +37,12 @@ class ResNet1D(nn.Module):
 
         self.layer1 = ResBlock1D(16, 32)
         self.layer2 = ResBlock1D(32, 64, stride=2)
-        self.layer3 = ResBlock1D(64, 128, stride=2)
+        # self.layer3 = ResBlock1D(64, 128, stride=2)
 
         self.avgpool = nn.AdaptiveAvgPool1d(1)
         self.head = nn.Sequential(
             nn.Dropout(0.3),
-            nn.Linear(128, num_classes)
+            nn.Linear(64, num_classes)
         )
 
     def forward(self, x):
@@ -50,7 +50,7 @@ class ResNet1D(nn.Module):
         x = self.initial(x)
         x = self.layer1(x)
         x = self.layer2(x)
-        x = self.layer3(x)
+        # x = self.layer3(x)
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         return self.head(x)
