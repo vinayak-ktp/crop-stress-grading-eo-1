@@ -24,7 +24,7 @@ class HybridModel(nn.Module):
             d_model=d_model, nhead=nhead, dim_feedforward=256,
             batch_first=True, dropout=0.2
         )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=2)
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=1)
 
         self.classifier = nn.Sequential(
             nn.Flatten(),

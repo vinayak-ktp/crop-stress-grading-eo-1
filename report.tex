@@ -1,5 +1,7 @@
 \documentclass[ 12pt,a4paper,twocolumn,fleqn]{report}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, fit, backgrounds}
 \usepackage[a4paper,top=20mm, bottom=30mm, left=10mm, right=25mm]{geometry}
 \usepackage{fancyhdr}
 \usepackage{hyperref}
@@ -8,8 +10,9 @@
 \usepackage{color}
 \usepackage{fancybox}
 \usepackage{lastpage}
-\thisfancypage{%
+\fancypage{%
   \setlength{\fboxsep}{20pt}\doublebox}{}
+
 \pagestyle{fancy}
 \usepackage{lineno}
 \usepackage{xtab,booktabs}
@@ -19,6 +22,8 @@
 \usepackage{tocloft} 
 \addtolength{\cftaftertoctitleskip}{-\baselineskip} 
 \usepackage[compact]{titlesec}
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-30pt}{20pt}
 \titlespacing{\section}{0pt}{*0}{*0}
 \titlespacing{\subsection}{0pt}{*0}{*0}
 \titlespacing{\subsubsection}{0pt}{*0}{*0}
@@ -36,16 +41,15 @@
 \pagenumbering{global}
 \fancypagestyle{myfooter}{
     \fancyhf{} 
-    \fancyfoot[L]{Department of CSE} 
-    \fancyfoot[R]{\protect\thepage} 
+    \fancyfoot[C]{\protect\thepage} 
     \renewcommand{\headrulewidth}{0pt} 
-    \renewcommand{\footrulewidth}{0.4pt} 
+    \renewcommand{\footrulewidth}{0pt} 
 }
 
 % Redefine plain page style for chapters
 \fancypagestyle{plain}{
     \fancyhf{} 
-    \fancyfoot[R]{\protect\thepage} 
+    \fancyfoot[C]{\protect\thepage} 
     \renewcommand{\headrulewidth}{0pt} 
     \renewcommand{\footrulewidth}{0pt} 
 }
@@ -53,11 +57,8 @@
 % Define a new page style combining fancy and myfooter
 \fancypagestyle{combined}{
     \fancyhf{} 
-    \fancyhead{} 
-    \fancyhead[L]{Crop Stress Grading using Hyperspectral Data and Deep Learning} 
-    \fancyfoot[L]{Department of CSE (AI \& ML)} 
-    \fancyfoot[R]{\protect\thepage} 
-    \renewcommand{\headrulewidth}{0.4pt} 
+    \fancyfoot[C]{\protect\thepage} 
+    \renewcommand{\headrulewidth}{0pt} 
     \renewcommand{\footrulewidth}{0pt} 
 }
 \begin{document}
@@ -75,7 +76,7 @@ Bengaluru South Dt. – 562 112 }
 \end{center}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.4\textwidth]{image/SCHOOL OF ENGINEERING_c.png}
+    \includegraphics[width=0.4\textwidth]{SOE_c.png}
 \end{figure}
 \begin{center}
     \Large\textbf{Bachelor of Technology} \\
@@ -91,15 +92,17 @@ Bengaluru South Dt. – 562 112 }
 \vspace{10mm}
 \begin{center}
     \small\textbf{By} \\
-    \normalsize\textbf{VANSH SONI} \\
+    \normalsize\textbf{Vansh Kumar Soni - ENG23AM0081} \\
+    \normalsize\textbf{Vinayak K - ENG23AM0086} \\
+    \normalsize\textbf{Abhishek Tiwari - ENG23AM0081} \\
 \end{center}
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.11\textwidth]{image/Logo of AIML.jpg}
+    \includegraphics[width=0.11\textwidth]{Logo of AIML.jpg}
 \end{figure}
 \begin{center}
     \normalsize\textbf{Under the supervision of} \\
-    \normalsize\textbf{Prof. UDAYA BHASKARA N} \\
+    \normalsize\textbf{Prof. Bhuvana Mohini T N} \\
     \normalsize\textbf{Assistant Professor}\\
     \normalsize\textbf{Computer Science \& Engineering (AI \& ML)}
 \end{center}
@@ -112,12 +115,11 @@ Bengaluru South Dt. – 562 112 }
 
 \newpage
   \pagestyle{plain}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
+
 \begin{center}
 \textcolor{blue}{\LARGE\textbf{{DAYANANDA SAGAR UNIVERSITY}}} \\
 \vspace{2mm}
-\includegraphics[width=1\textwidth]{image/certificate.png} \\
+\includegraphics[width=1\textwidth]{certificate.png} \\
 \begin{center}
     \large\textbf{Department of Computer Science \& Engineering}\\
     \large\textbf{(ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING)}\\
@@ -131,15 +133,15 @@ Bengaluru South Dt. – 562 112\\}
   \end{center}
   \vspace{5mm}
 \normalsize
-This is to certify that the project entitled \textbf{“Crop Stress Grading using Hyperspectral Data and Deep Learning”} is carried out by \textbf{VANSH SONI}, 
-bonafide student of Bachelor of Technology in Computer Science and Engineering at the School of Engineering, Dayananda Sagar University, Bangalore, in partial fulfillment for the award of a degree in Bachelor of Technology in Computer Science and Engineering, during the year 
+This is to certify that the project entitled \textbf{“Crop Stress Grading using Hyperspectral Data and Deep Learning”} is carried out by \textbf{Vansh Kumar Soni, Vinayak K, and Abhishek Tiwari}, 
+bonafide students of Bachelor of Technology in Computer Science and Engineering at the School of Engineering, Dayananda Sagar University, Bangalore, in partial fulfillment for the award of a degree in Bachelor of Technology in Computer Science and Engineering, during the year 
 \textbf{2025 \-- 2026}.\\
 
 \vspace{20mm}
 \noindent
 \begin{minipage}[t]{0.31\textwidth}
 \small
-  \textbf{Prof. Udayabhaskara N}\\
+  \textbf{Prof. Bhuvana Mohini T N}\\
   Assistant Professor\\
   Dept. of CSE (AI\&ML)\\
   School of Engineering\\
@@ -169,7 +171,7 @@ bonafide student of Bachelor of Technology in Computer Science and Engineering a
   Signature .........................\\
 \end{minipage}
 
-\vspace{15mm}
+\vspace{10mm}
 \text{Name of the Examiners:}
 \hfill
 \vspace{5mm}
@@ -184,13 +186,12 @@ bonafide student of Bachelor of Technology in Computer Science and Engineering a
 
 \newpage
   \pagestyle{plain}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
+
   \begin{center}
     \huge\textbf{DECLARATION}
 \end{center}
 \vspace{15mm}
-I, \textbf{VANSH SONI}, am a student of B.Tech in Computer Science and Engineering (AI \& ML) at the School of Engineering, Dayananda Sagar University. I hereby declare that the Major Project titled \textbf{“Crop Stress Grading using Hyperspectral Data and Deep Learning”} has been carried out by me and submitted in partial fulfillment for the award of a degree in \textbf{Bachelor of Technology} in \textbf{Computer Science and Engineering} during the academic year \textbf{2025--2026}.
+We, \textbf{Vansh Kumar Soni, Vinayak K, and Abhishek Tiwari}, are students of B.Tech in Computer Science and Engineering (AI \& ML) at the School of Engineering, Dayananda Sagar University. I hereby declare that the Major Project titled \textbf{“Crop Stress Grading using Hyperspectral Data and Deep Learning”} has been carried out by us and submitted in partial fulfillment for the award of a degree in \textbf{Bachelor of Technology} in \textbf{Computer Science and Engineering} during the academic year \textbf{2025--2026}.
 \vspace{15 mm}
 
 
@@ -198,7 +199,11 @@ I, \textbf{VANSH SONI}, am a student of B.Tech in Computer Science and Engineeri
 \begin{minipage}{0.8\textwidth}
     \textbf{Student:} \hfill\textbf{Signature}\\
     
-    \textbf{Name:} VANSH SONI \\
+    \textbf{Name 1:} Vansh Kumar Soni \\ \textbf{USN:} ENG23AM0081 \\
+    
+    \textbf{Name 2:} Vinayak K \\ \textbf{USN:} ENG23AM0086 \\
+    
+    \textbf{Name 3:} Abhishek Tiwari \\ \textbf{USN:} ENG23AM0081 \\
 \end{minipage}
 
 \begin{flushleft}
@@ -209,8 +214,7 @@ I, \textbf{VANSH SONI}, am a student of B.Tech in Computer Science and Engineeri
 
 \newpage
   \pagestyle{fancy}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
+
 \begin{center}
     \huge\textbf{ABSTRACT}
 \end{center}
@@ -219,14 +223,20 @@ This study investigates the application of deep learning models for classifying 
 
 In this project, a robust data pipeline was developed to preprocess the hyperspectral data. This included missing value imputation, Savitzky-Golay filtering for spectrum smoothing, first-derivative spectroscopy, and the computation of targeted indices like the Moisture Stress Index (MLVI) and Hyperspectral Vegetation Stress Index (H-VSI). Data augmentation was performed using SMOTE to handle class imbalances across the six crop stress stages.
 
-Four distinct deep neural network architectures were designed and evaluated: a 1D Convolutional Neural Network (CNN), a 1D ResNet, a Transformer model, and a Hybrid model combining Conv1D layers with a Transformer encoder. The models were trained using a cosine annealing learning rate scheduler and evaluated on a hold-out test set. The Hybrid model demonstrated the most promising results, achieving the highest accuracy of 90.10\%, effectively capturing both local spectral features and global dependencies. This research highlights the transformative potential of combining hyperspectral data with advanced AI techniques for early, automated, and accurate crop stress grading, paving the way for targeted agricultural interventions and enhanced crop yield.
+Four distinct deep neural network architectures were designed and evaluated: a 1D Convolutional Neural Network (CNN), a 1D ResNet, a Transformer model, and a Hybrid model combining Conv1D layers with a Transformer encoder. The models were trained using a cosine annealing learning rate scheduler and evaluated on a hold-out test set. The Hybrid model demonstrated the most promising results, achieving the highest accuracy of 90.48\%, effectively capturing both local spectral features and global dependencies. This research highlights the transformative potential of combining hyperspectral data with advanced AI techniques for early, automated, and accurate crop stress grading, paving the way for targeted agricultural interventions and enhanced crop yield.
 
 
 \newpage
     \pagestyle{combined}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
-  \pagenumbering{arabic}
+
+  \pagenumbering{roman}
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+\pagenumbering{arabic}
 \chapter{INTRODUCTION}
 In the field of precision agriculture, ensuring crop health and optimizing yield are paramount challenges. Crops are frequently subjected to various biotic and abiotic stresses such as diseases, pest infestations, water scarcity, and nutrient deficiencies. The critical need to discover and grade these stresses early has been highlighted by the pressing need to begin treatments promptly, which can greatly affect agricultural outcomes and food security. The use of hyperspectral data as a diagnostic tool to reveal complex patterns of crop reflectance is the focus of this report, which aims to provide an automated deep learning solution.
 
@@ -242,9 +252,33 @@ In the field of precision agriculture, ensuring crop health and optimizing yield
 
 \newpage
   \pagestyle{fancy}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
+
 \normalsize
+\chapter{LITERATURE REVIEW}
+\vspace{2mm}
+The following table summarizes the foundational research, methodologies, and advancements in the domain of crop stress detection using hyperspectral imaging and deep learning techniques.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\footnotesize
+\tablefirsthead{\hline \textbf{S.No.} & \textbf{Details of Paper} & \textbf{Objectives, Dataset, Methodology} & \textbf{Results/Advantages/Limitations} \\ \hline}
+\tablehead{\hline \textbf{S.No.} & \textbf{Details of Paper} & \textbf{Objectives, Dataset, Methodology} & \textbf{Results/Advantages/Limitations} \\ \hline}
+\tabletail{\hline}
+\tablelasttail{\hline}
+\begin{xtabular}{|c|p{3.5cm}|p{5cm}|p{5cm}|}
+1 & Mehdipour, S. et al. (2026) Hybrid CNN-ViT for maize leaf disease classification. \textit{Scientific Reports}. & Proposed lightweight CNN + Vision Transformer (ViT) hybrid architecture. Mixture-of-Experts (MoE) modules to fuse local CNN + global ViT features. Trained on real-world full maize plant images. & Achieved 99.90\% classification accuracy. \textbf{Limitation:} Operates at leaf level only --- lacks satellite-scale field monitoring capability. \\ \hline
+2 & Szwarcman, D. et al. (2025) Prithvi-EO-2.0: Multi-Temporal Foundation Model for EO. \textit{arXiv:2412.02732}. & Vision Transformer with 3D spatiotemporal embeddings; trained using Masked Autoencoder. Pre-trained on 4.2M HLS Sentinel-2 + Landsat tiles at global scale. & +8\% improvement over Prithvi-EO-1.0 on GEO-Bench; SOTA across all EO benchmark tasks. \\ \hline
+3 & Edward, A.S. (2025) MLVI-CNN: Hyperspectral stress detection framework. \textit{Front. Plant Science}. & Designed novel MLVI + H\_VSI spectral indices using Recursive Feature Elimination (RFE). Applied 1D CNN on NIR, SWIR1, SWIR2 bands for early multi-severity stress grading. & Achieved 83.40\% accuracy; detects stress 10--15 days earlier than standard NDVI methods. \textbf{Limitation:} Requires expensive hyperspectral sensor. \\ \hline
+4 & Salman, Z. et al. (2025) Plant disease classification using ViT + MoE. \textit{Front. Plant Sci.} & ViT encoder combined with Mixture of Experts (MoE) for multi-class disease classification. Benchmarked across diverse plant species with real-world background variation. & Significant accuracy gain over standard CNN baselines. \textbf{Limitation:} Uses RGB leaf images only --- does not leverage multi-spectral imagery. \\ \hline
+5 & Bharali, P. et al. (2025) Trustworthy AI for crop stress detection via satellite imagery. \textit{Computers \& Electronics in Agriculture}. & Applied U-Net++ segmentation model on Landsat 8/9 NDVI and Land Surface Temperature (LST). Integrated explainability (XAI) layer for interpretable decisions. & Achieved 96.1\% segmentation accuracy with F1 score of 0.945. \textbf{Limitation:} Covers only 2 stress types. \\ \hline
+6 & Chaplot, V. et al. (2025) CNN-RNN hybrid for crop mapping via Sentinel-2. \textit{Remote Sensing}. & Hybrid 2D CNN-GRU model processes Sentinel-2 multitemporal stacks with NDVI and NDRE indices. Evaluated on Northern Italy case study with high field diversity. & Overall Accuracy 99.12\% and macro-F1 99.14\% for crop type mapping. \textbf{Limitation:} Focuses on crop type mapping only. \\ \hline
+7 & Hong et al., (2021) SpectralFormer. \textit{IEEE TGRS}. & Transformer for hyperspectral image classification. Captures long-range spectral dependencies. & State-of-art on HSI benchmarks. \textbf{Limitation:} Designed for spatial-spectral data, not purely single-pixel spectral profiles. \\ \hline
+8 & Selvaraju et al., (2016) Grad-CAM. \textit{ICCV}. & Gradient-based CNN explanation. Visual attribution maps for interpretability. & Class-conditional; requires no architectural change. \textbf{Limitation:} Coarse resolution; CNN-only. \\ \hline
+9 & Lundberg \& Lee, (2017) GradientShap. \textit{NeurIPS}. & SHAP value approximation. Feature attribution scores. & Theoretically grounded; pixel-level interpretability. \textbf{Limitation:} Computationally intensive. \\ \hline
+10 & Hu et al. (2015) \textit{IEEE GRSL}. & 1D-CNN for spectral classification. End-to-end spectral feature learning. & Outperforms PCA+SVM. \textbf{Limitation:} Shallow architecture; lacks explainability features. \\
+\end{xtabular}
+\end{center}
+
 \chapter{PROBLEM DEFINITION AND OBJECTIVE}
 \section{Problem Definition}
 \vspace{2mm}
@@ -262,13 +296,12 @@ Early detection of crop stress is a significant challenge in precision agricultu
     \item \textbf{High-Dimensional Data Processing:} Addresses the pressing issue of analyzing high-dimensional 1D hyperspectral signals, which contain hundreds of overlapping bands.
     \item \textbf{Advanced Preprocessing:} Employs Savitzky-Golay filtering for smoothing and computes the first derivative to highlight rapid changes in the spectral curve (e.g., the red edge).
     \item \textbf{Feature Engineering:} Integrates specific domain-knowledge indices, including Moisture Stress Index (MLVI) and Hyperspectral Vegetation Stress Index (H-VSI), utilizing specific Near-Infrared (NIR) and Short-Wave Infrared (SWIR) bands.
-    \item \textbf{Deep Learning Models Employed:} Explores traditional 1D CNNs, Deep Residual Networks (ResNet1D), sequence-to-sequence Transformer architectures, and a novel Hybrid (Conv1D + Transformer) approach to capture both local spatial features and global contextual dependencies in the spectrum.
+    \item \textbf{Deep Learning Models Employed:} Explores traditional 1D CNNs, Deep Residual Networks (ResNet1D), sequence-to-sequence Transformer architectures, and a novel Hybrid (ResNet1D + Transformer) approach to capture both local spatial features and global contextual dependencies in the spectrum.
 \end{itemize}
 
 \newpage
   \pagestyle{fancy}
-\thisfancypage{%
-  \setlength{\fboxsep}{14pt}\doublebox}{}
+
 \normalsize
 \chapter{METHODOLOGY}
 \section{Dataset Collection and Preprocessing}
@@ -295,9 +328,68 @@ Four distinct deep learning models were designed to classify the 1D hyperspectra
 
 \newpage
   \pagestyle{fancy}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
+
 \normalsize
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        box/.style={draw, rectangle, rounded corners, minimum width=4cm, minimum height=1cm, align=center, fill=blue!10, font=\small},
+        arrow/.style={-{Stealth[length=2mm, width=2mm]}, thick},
+        group/.style={draw, rectangle, dashed, inner sep=12pt, fill=gray!5, rounded corners}
+    ]
+
+    % Nodes
+    \node (input) [box, fill=green!10] {Input\\(Batch, 1, Seq\_Len)};
+    
+    \node (conv1) [box, below=1.2cm of input, xshift=-2.5cm] {Conv Block 1\\Conv1D (32, k=3) $\rightarrow$ BN $\rightarrow$ ReLU};
+    \node (conv2) [box, below=0.8cm of conv1] {Conv Block 2\\Conv1D (64, k=3) $\rightarrow$ BN $\rightarrow$ ReLU};
+    
+    \node (skip) [box, below=1.2cm of input, xshift=2.5cm] {Skip Projection\\Conv1D (64, k=1)};
+    
+    \node (add) [draw, circle, below=0.8cm of conv2, xshift=2.5cm, fill=yellow!20] {\textbf{+}};
+    
+    \node (pool) [box, below=0.8cm of add] {MaxPool1D (k=2) \& Transpose\\Shape: (Seq\_Len/2, 64)};
+    
+    \node (trans1) [box, below=1.5cm of pool, fill=orange!15] {Transformer Layer 1\\(Heads=4, d\_model=64, FF=256)};
+    \node (trans2) [box, below=0.8cm of trans1, fill=orange!15] {Transformer Layer 2\\(Heads=4, d\_model=64, FF=256)};
+    
+    \node (flatten) [box, below=1.5cm of trans2, fill=red!10] {Flatten};
+    
+    \node (dense1) [box, below=0.8cm of flatten, fill=red!10] {Dense 1 (256)\\ReLU $\rightarrow$ Dropout(0.3)};
+    \node (dense2) [box, below=0.8cm of dense1, fill=red!10] {Dense 2 (64)\\ReLU};
+    \node (output) [box, below=0.8cm of dense2, fill=green!10] {Output Classification\\Linear (Num\_Classes)};
+
+    % Background Boxes
+    \begin{scope}[on background layer]
+        \node [group, fit=(conv1) (conv2) (add) (pool) (skip), label={[anchor=south]north:\textbf{Residual CNN Feature Extractor}}] (cnngroup) {};
+        \node [group, fit=(trans1) (trans2), minimum width=9cm, label={[anchor=south]north:\textbf{Transformer Global Encoder}}] (transgroup) {};
+        \node [group, fit=(flatten) (dense1) (dense2) (output), minimum width=9cm, label={[anchor=south]north:\textbf{Classification Head}}] (classgroup) {};
+    \end{scope}
+
+    % Edges
+    \draw [arrow] (input.south) -- ++(0,-0.5) -| (conv1.north);
+    \draw [arrow] (input.south) -- ++(0,-0.5) -| (skip.north);
+    
+    \draw [arrow] (conv1) -- (conv2);
+    
+    \draw [arrow] (conv2.south) |- (add.west);
+    \draw [arrow] (skip.south) |- (add.east);
+    
+    \draw [arrow] (add) -- (pool);
+    \draw [arrow] (pool) -- (trans1);
+    \draw [arrow] (trans1) -- (trans2);
+    \draw [arrow] (trans2) -- (flatten);
+    \draw [arrow] (flatten) -- (dense1);
+    \draw [arrow] (dense1) -- (dense2);
+    \draw [arrow] (dense2) -- (output);
+
+    \end{tikzpicture}
+    \vspace{2mm}
+    \caption{Architecture Diagram of the Hybrid (ResNet1D + Vision Transformer) Model}
+    \label{fig:hybrid_arch}
+\end{figure}
+
 \chapter{REQUIREMENTS}
 \section{Hardware Requirements}
 \vspace{2mm}
@@ -320,8 +412,7 @@ Four distinct deep learning models were designed to classify the 1D hyperspectra
 
 \newpage
   \pagestyle{fancy}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
+
 \normalsize
 \chapter{EXPERIMENTATION AND RESULTS}
 \section{Training Strategy}
@@ -340,29 +431,62 @@ The models were evaluated on a completely unseen test set. The primary metrics u
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{|c|c|c|}
+    \begin{tabular}{|c|c|c|c|}
     \hline
-     \textbf{DEEP LEARNING MODEL} & \textbf{ACCURACY} & \textbf{MCC} \\
+     \textbf{DEEP LEARNING MODEL} & \textbf{PARAMETERS} & \textbf{ACCURACY} & \textbf{MCC} \\
    \hline
-   Paper CNN & 83.27 \% & 0.7931 \\
+   Paper CNN & 26,982 & 83.85 \% & 0.8001 \\
    \hline
-   ResNet1D & 89.23 \% & 0.8662 \\
+   ResNet1D & 439,766 & 87.60 \% & 0.8460 \\
     \hline
-   Transformer & 89.04 \% & 0.8637 \\
+   Transformer & 4,492,550 & 88.75 \% & 0.8602 \\
     \hline
-   \textbf{Hybrid (CNN + Transformer)} & \textbf{90.10 \%} & \textbf{0.8767} \\
+   \textbf{Hybrid (ResNet1D + Transformer)} & \textbf{2,286,406} & \textbf{90.48 \%} & \textbf{0.8820} \\
     \hline
     \end{tabular}
     \caption{Performance metrics of different deep learning models on the test set}
     \label{tab:results}
 \end{table}
 
-The Hybrid model demonstrated the superior capability, achieving the highest accuracy of 90.10\%. This indicates that combining convolutional layers for local spectral feature extraction with a Transformer encoder for global dependency modeling provides the optimal inductive bias for hyperspectral crop data. ResNet1D also performed exceptionally well, closely followed by the standalone Transformer, while the simpler Paper CNN lagged behind.
+The Hybrid model demonstrated the superior capability, achieving the highest accuracy of 90.48\%. This indicates that combining convolutional layers for local spectral feature extraction with a Transformer encoder for global dependency modeling provides the optimal inductive bias for hyperspectral crop data. ResNet1D also performed exceptionally well, closely followed by the standalone Transformer, while the simpler Paper CNN lagged behind.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{test_metrics_comparision.png}
+    \caption{Comparison of test metrics across different models}
+    \label{fig:metrics_comparison}
+\end{figure}
+Figure \ref{fig:metrics_comparison} visually highlights the performance differences among the evaluated models, showing the clear advantage of the Hybrid and ResNet architectures.
+
+To further interpret the decision-making process of our best-performing Hybrid model, we utilized various explainability techniques.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{attention_heatmap.png}
+    \caption{Attention Heatmap of the Hybrid Model}
+    \label{fig:attention}
+\end{figure}
+Figure \ref{fig:attention} illustrates the attention heatmap, revealing which spectral bands the Transformer encoder focused on most heavily during classification.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{gradcam_heatmap.png}
+    \caption{Grad-CAM Heatmap of the Hybrid Model}
+    \label{fig:gradcam}
+\end{figure}
+Figure \ref{fig:gradcam} displays the Grad-CAM visualization, highlighting the regions of the input sequence that contributed most significantly to the final prediction.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{gradientshap_heatmap.png}
+    \caption{Gradient SHAP Heatmap of the Hybrid Model}
+    \label{fig:gradientshap}
+\end{figure}
+Figure \ref{fig:gradientshap} presents the Gradient SHAP heatmap, offering a nuanced view of feature importance by attributing the model's output to specific input features.
 
 \newpage
   \pagestyle{fancy}
-\thisfancypage{%
-  \setlength{\fboxsep}{20pt}\doublebox}{}
+
 \normalsize
 \chapter{CONCLUSION AND FUTURE SCOPE}
 
