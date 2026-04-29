@@ -11,3 +11,9 @@ data/splits/*
 
 !data/processed/.gitkeep
 !data/splits/.gitkeep
+
+*.pdf
+*.tex
+*.docx
+*.pptx
+*.ipynb
