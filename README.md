@@ -88,12 +88,12 @@ Hyperspectral data contains hundreds of bands, many of which may be redundant or
 
 All models are trained with the AdamW optimiser, cosine annealing learning rate scheduler with warm restarts, cross-entropy loss with label smoothing, and early stopping.
 
-| Model       | Accuracy (%) | F1 Score (%) |
-| ----------- | ------------ | ------------ |
-| Paper CNN   | 83.85        | 83.88        |
-| ResNet      | 85.96        | 86.00        |
-| Transformer | 88.17        | 88.19        |
-| Hybrid      | 90.48        | 90.48        |
+| Model       | Accuracy (%) | F1 Score (%) | MCC Score (%) |
+| ----------- | ------------ | ------------ | ------------- |
+| Paper CNN   | 83.85        | 83.88        | 80.01         |
+| ResNet      | 87.60        | 87.52        | 84.60         |
+| Transformer | 88.75        | 88.81        | 86.02         |
+| Hybrid      | 90.67        | 90.66        | 88.40         |
 
 ---
 
@@ -201,6 +201,8 @@ Generate salience and interaction graphs for model interpretation.
 ```bash
 python -m scripts.explain --exp MyExperiment --model hybrid --method all
 ```
+
+*Note: The script features dynamic feature trimming, making it backwards compatible with legacy models trained on fewer features (e.g., 264 bands) even when evaluating against the newer extended dataset (395 bands).*
 
 Output: Multiple heatmaps and graphs in `_results/explain/MyExperiment/hybrid/`
 
